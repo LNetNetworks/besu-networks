@@ -3,6 +3,18 @@
   debug:
         msg: "Updating Besu"
 
+- name: Resolve besu home directory (prefer ~/lacchain, fallback /apps/lacchain)
+  shell: |
+    if [ -d "$HOME/lacchain" ]; then echo "$HOME/lacchain";
+    elif [ -d /apps/lacchain ]; then echo /apps/lacchain;
+    else echo "$HOME/lacchain"; fi
+  register: besu_home_result
+  changed_when: false
+
+- name: Set besu_home fact
+  set_fact:
+    besu_home: "{{ besu_home_result.stdout }}"
+
 - name: previous clearing
   shell: rm -rf /tmp/besu && mkdir /tmp/besu
 
@@ -66,12 +78,12 @@
 - name: Copy latest genesis ibft2.0 file
   copy:
     src: "{{ role_path }}/files/genesis-{{network}}.json"
-    dest: ~/lacchain/data/genesis.json
+    dest: "{{ besu_home }}/data/genesis.json"
     mode: 0755
 
 - name: ensure tx-pool=legacy in config.toml (open-protestnet / testnet)
   lineinfile:
-    path: ~/lacchain/config.toml
+    path: "{{ besu_home }}/config.toml"
     regexp: '^\s*tx-pool\s*='
     line: 'tx-pool="legacy"'
     insertafter: '^min-gas-price='
