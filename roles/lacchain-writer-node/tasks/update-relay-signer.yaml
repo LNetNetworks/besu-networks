@@ -8,29 +8,39 @@
     name: relaysigner
     state: stopped
 
-- name: Ensure Relay Signer directory exists (testnet)
+- name: Ensure Relay Signer directory exists
   file:
         path: "/root/lacchain/gas-relay-signer"
         state: directory
         mode: '0755'
-  when: (networkT == '1')
 
-- name: Download Relay Signer binary from release (testnet)
+# Copia del binario y de la config en ejecución antes de reemplazarlos, para poder volver atrás
+# (en mainnet el binario previo es el v1.0.1 que venía versionado en el repo clonado).
+- name: Check current Relay Signer binary
+  stat:
+    path: "/root/lacchain/gas-relay-signer/gas-relay-signer"
+  register: relay_signer_bin
+
+- name: Backup current Relay Signer binary and config
+  copy:
+        src: "/root/lacchain/gas-relay-signer/{{ item }}"
+        dest: "/root/lacchain/gas-relay-signer/{{ item }}.bak"
+        remote_src: yes
+        mode: preserve
+  with_items:
+        - gas-relay-signer
+        - config.toml
+  when: relay_signer_bin.stat.exists
+  failed_when: false
+
+# mainnet y testnet: se descarga el ejecutable de la release. En mainnet esto sustituye al antiguo
+# `git clone` en v1.0.1: desde v1.1.0 el binario ya no está en el repo.
+- name: Download Relay Signer binary from release
   get_url:
-        url: "https://github.com/LACNetNetworks/gas-management/releases/download/{{ relay_signer_version }}/gas-relay-signer-linux-amd64"
+        url: "{{ relay_signer_release_url }}"
         dest: "/root/lacchain/gas-relay-signer/gas-relay-signer"
         mode: '0755'
         force: true
-  when: (networkT == '1')
-
-# mainnet: sigue el repo pineado en v1.0.1 (sin cambios)
-- name: Update Relay Signer code (mainnet)
-  git:
-        repo: "https://github.com/LACNetNetworks/gas-management.git"
-        dest: "/root/lacchain/gas-relay-signer"
-        version: v1.0.1
-        force: yes
-  when: (networkT == '0')
 
 - name: Regenerate Relay Signer configuration file
   template:

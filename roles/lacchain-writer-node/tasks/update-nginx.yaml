@@ -7,6 +7,14 @@
   debug:
         msg: "Updating nginx configuration"
 
+- name: Backup current nginx.conf before overwriting it
+  copy:
+        src: /etc/nginx/nginx.conf
+        dest: "/etc/nginx/nginx.conf.bak-{{ ansible_date_time.epoch }}"
+        remote_src: yes
+        mode: preserve
+  failed_when: false
+
 - name: Configure nginx for {{ ansible_distribution }} {{ansible_distribution_major_version}}
   import_tasks: "configure-nginx.yml"
   when: ((ansible_distribution |lower == 'redhat'  or ansible_distribution |lower == 'centos') and  ansible_distribution_major_version < "8") or (ansible_distribution |lower == 'ubuntu') and (ansible_distribution_major_version |int < 21)
