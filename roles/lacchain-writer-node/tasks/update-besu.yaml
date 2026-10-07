@@ -66,7 +66,7 @@
 - name: Copy latest genesis ibft2.0 file
   copy:
     src: "{{ role_path }}/files/genesis-{{network}}.json"
-    dest: ~/lacchain/data/genesis.json
+    dest: "{{ besu_home }}/data/genesis.json"
     mode: 0755
 
 # Besu >= 23.10 usa el txpool layered por defecto y se niega a arrancar si el config.toml tiene
@@ -74,7 +74,7 @@
 # writer de mainnet. En 23.4.1 la opción tx-pool no existe, por eso se condiciona a la versión.
 - name: ensure tx-pool=legacy in config.toml (testnet, o cualquier red con Besu >= 23.10)
   lineinfile:
-    path: ~/lacchain/config.toml
+    path: "{{ besu_home }}/config.toml"
     regexp: '^\s*tx-pool\s*='
     line: 'tx-pool="legacy"'
     insertafter: '^min-gas-price='

@@ -3,11 +3,19 @@
   debug:
     msg: Configuring Rotation Validator Process
 
+# Solo se crea la unidad si no existe: en un update no se reescribe la de un validador ya en
+# marcha (algunos tienen su unidad propia y reescribirla podría arrancar un segundo cliente).
+- name: Check existing Rotation Validator unit
+  stat:
+    path: /lib/systemd/system/rotationvalidator.service
+  register: rotation_unit
+
 - name: Copy service file to systemd
-  copy:
-    src: "{{ role_path }}/files/rotation-validator.service"
+  template:
+    src: "rotation-validator.service.j2"
     dest: /lib/systemd/system/rotationvalidator.service
-    mode: 0775
+    mode: 0644
+  when: not rotation_unit.stat.exists
 
 - name: Reload systemctl daemon
   shell: systemctl daemon-reload   

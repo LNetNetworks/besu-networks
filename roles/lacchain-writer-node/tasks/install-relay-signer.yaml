@@ -1,13 +1,13 @@
 ---
 - name: Checking if Relay Signer exists
   stat:
-    path: "/root/lacchain/gas-relay-signer/config.toml"
+    path: "{{ besu_home }}/gas-relay-signer/config.toml"
   register: relay_signer
 
 # mainnet y testnet: solo se descarga el ejecutable desde la release, sin clonar el repo
 - name: Ensure Relay Signer directory exists
   file:
-        path: "/root/lacchain/gas-relay-signer"
+        path: "{{ besu_home }}/gas-relay-signer"
         state: directory
         mode: '0755'
   when: not relay_signer.stat.exists
@@ -15,17 +15,17 @@
 - name: Download Relay Signer binary from release
   get_url:
         url: "{{ relay_signer_release_url }}"
-        dest: "/root/lacchain/gas-relay-signer/gas-relay-signer"
+        dest: "{{ besu_home }}/gas-relay-signer/gas-relay-signer"
         mode: '0755'
         force: true
   when: not relay_signer.stat.exists
 
 - name: semanage gas-relay-signer service on centos{{ansible_distribution_major_version}}
-  shell: semanage fcontext -a -t bin_t '/root/lacchain/gas-relay-signer/gas-relay-signer'
+  shell: semanage fcontext -a -t bin_t '{{ besu_home }}/gas-relay-signer/gas-relay-signer'
   when: ((ansible_distribution |lower == 'centos' or ansible_distribution |lower == 'redhat' or ansible_distribution  |lower == 'rocky' or ansible_distribution |lower == 'oraclelinux') and ansible_distribution_major_version >= "8") 
 
 - name: restorecon gas-relay-signer service on centos{{ansible_distribution_major_version}}
-  shell: restorecon -Fv /root/lacchain/gas-relay-signer/gas-relay-signer
+  shell: restorecon -Fv {{ besu_home }}/gas-relay-signer/gas-relay-signer
   when: ((ansible_distribution |lower == 'centos' or ansible_distribution |lower == 'redhat' or ansible_distribution  |lower == 'rocky' or ansible_distribution |lower == 'oraclelinux') and ansible_distribution_major_version >= "8") 
 
 
@@ -33,12 +33,12 @@
 - name: Generate Relay Signer configuration file
   template:
     src: "relay-signer-config.j2"
-    dest: "~/lacchain/gas-relay-signer/config.toml"
+    dest: "{{ besu_home }}/gas-relay-signer/config.toml"
     mode: 0644
   when: not relay_signer.stat.exists 
 
 - name: Get Key
-  shell: cat ~/lacchain/data/key
+  shell: cat {{ besu_home }}/data/key
   register: key
   when: not relay_signer.stat.exists
   no_log: true
@@ -73,7 +73,7 @@
 
 - name: Copy service file to systemd
   copy:
-    src: "{{ role_path }}/files/relaysigner.service"
+    src: "relaysigner.service.j2"
     dest: /lib/systemd/system/relaysigner.service
     mode: 0775
   when: not relay_signer.stat.exists

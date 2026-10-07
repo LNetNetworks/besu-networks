@@ -23,6 +23,20 @@
   debug:
     msg: You are deploying a WRITER on {{network}}
 
+# El nodo vive en /root/lacchain (instalaciones con este Ansible) o en /apps/lacchain (disco de
+# datos aparte). En una instalación nueva no existe ninguno y se usa /root/lacchain.
+- name: Resolve besu home directory (prefer ~/lacchain, fallback /apps/lacchain)
+  shell: |
+    if [ -d "$HOME/lacchain" ]; then echo "$HOME/lacchain";
+    elif [ -d /apps/lacchain ]; then echo /apps/lacchain;
+    else echo "$HOME/lacchain"; fi
+  register: besu_home_result
+  changed_when: false
+
+- name: Set besu_home fact
+  set_fact:
+    besu_home: "{{ besu_home_result.stdout }}"
+
 - name: get public ip
   shell: dig +short myip.opendns.com @resolver1.opendns.com 2>/dev/null || curl -s --retry 2 icanhazip.com
   register: ip_address
