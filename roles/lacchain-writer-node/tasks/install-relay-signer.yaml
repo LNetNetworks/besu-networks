@@ -72,7 +72,7 @@
   when: not relay_signer.stat.exists
 
 - name: Copy service file to systemd
-  copy:
+  template:
     src: "relaysigner.service.j2"
     dest: /lib/systemd/system/relaysigner.service
     mode: 0775
