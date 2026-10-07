@@ -1,6 +1,6 @@
 [Unit]
 Description=RelaySigner service
-ConditionPathExists=/root/lacchain/gas-relay-signer/gas-relay-signer
+ConditionPathExists={{ besu_home }}/gas-relay-signer/gas-relay-signer
 After=network.target
 
 [Service]
@@ -13,8 +13,8 @@ Restart=on-failure
 RestartSec=10
 startLimitIntervalSec=60
 
-WorkingDirectory=/root/lacchain/gas-relay-signer
-ExecStart=/root/lacchain/gas-relay-signer/gas-relay-signer
+WorkingDirectory={{ besu_home }}/gas-relay-signer
+ExecStart={{ besu_home }}/gas-relay-signer/gas-relay-signer
 
 [Install]
 WantedBy=multi-user.target
