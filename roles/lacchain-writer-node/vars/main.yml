@@ -17,9 +17,10 @@ relayhub_address_mainnet: "0xEAA5420AF59305c5ecacCB38fcDe70198001d147"
 
 localpermissioning_address: "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
 
-# relay signer (testnet: se descarga el ejecutable de la release, no se clona el repo)
-# RC mientras sale de develop; al liberar desde master se sube a "v1.1.0"
-relay_signer_version: "v1.1.0-RC3"
+# relay signer: en mainnet y testnet se descarga el ejecutable de la release (desde v1.1.0 el
+# binario ya no se versiona en el repo, así que clonarlo no sirve)
+relay_signer_version: "v1.1.0"
+relay_signer_release_url: "https://github.com/LNetNetworks/gas-management/releases/download/{{ relay_signer_version }}/gas-relay-signer-linux-amd64"
 
 # vars for libsodium
 libsodium_base_url: https://download.libsodium.org/libsodium/releases
