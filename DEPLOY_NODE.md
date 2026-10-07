@@ -150,13 +150,16 @@ Once your node is ready, you can start it up with this command in **remote machi
 	35.193.123.227 
 	```
 
-	Optionally you can choose the sha_commit of the version you want to update; with Besu is is only neede to specify the version:
+	The official Besu version for LNet (mainnet and testnet) is **23.10.2**, used both for new
+	installations and for updates. The roles set it themselves, so a `besu_release_version` in the
+	inventory is ignored; to force another version pass it as an extra var:
 	```shell
-	[node] #here put the role you are gong to update
-	35.193.123.227 besu_release_version='22.1.0'
+	$ ansible-playbook -i inventory site-lacchain-update-node.yml --limit 35.193.123.227 -e besu_release_version=23.10.2
 	```
-	Current Besu versions obtained from: https://pegasys.tech/solutions/hyperledger-besu/
+	Besu releases: https://github.com/hyperledger/besu/releases
 	Tested BESU versions: 
+	23.10.2 (official)
+	23.4.1
 	21.1.6
 	20.10.4
 	1.5.3

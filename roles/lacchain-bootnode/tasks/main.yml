@@ -14,7 +14,8 @@
     msg: "legacy-protestnet (networkT='2') was deprecated and removed. Choose mainnet-omega (0) or open-protestnet (1)."
   when: (networkT == '2')
 
-# Besu 23.10.2 en mainnet y testnet (requiere tx-pool="legacy", ver update-besu.yaml). Para otra
+# Versión oficial de Besu para toda la red (install y update, mainnet y testnet): 23.10.2.
+# Requiere tx-pool="legacy" (plantillas pantheon-config y update-besu.yaml). Para otra
 # versión: -e besu_release_version=<x.y.z> (las extra vars ganan al set_fact).
 - name: setting besu version (mainnet / testnet)
   set_fact:
