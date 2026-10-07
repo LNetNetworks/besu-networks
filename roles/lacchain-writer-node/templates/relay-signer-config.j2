@@ -9,7 +9,6 @@ port = 9001
 [security]
 permissionsEnabled = false
 accountContractAddress = "{{localpermissioning_address}}"
-{% if network == 'openprotestnet' %}
 # Reordenamiento de nonces (v1.1.0+): permite encadenar varias metatx de un usuario sin esperar a
 # que cada una se mine. maxInflightPerUser toma su default (5), que iguala el techo de la red.
 [reorder]
@@ -23,4 +22,3 @@ receiptTimeoutMs = 60000
 [dashboard]
 enabled = false
 bufferSize = 1000
-{% endif %}

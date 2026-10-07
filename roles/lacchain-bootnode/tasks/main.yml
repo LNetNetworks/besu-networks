@@ -14,10 +14,12 @@
     msg: "legacy-protestnet (networkT='2') was deprecated and removed. Choose mainnet-omega (0) or open-protestnet (1)."
   when: (networkT == '2')
 
-- name: setting besu version (open-protestnet / testnet)
+# Besu 23.10.2 en mainnet y testnet (requiere tx-pool="legacy", ver update-besu.yaml). Para otra
+# versión: -e besu_release_version=<x.y.z> (las extra vars ganan al set_fact).
+- name: setting besu version (mainnet / testnet)
   set_fact:
     besu_release_version: "23.10.2"
-  when: (networkT == '1')
+  when: (networkT == '0') or (networkT == '1')
 
 - name: Deploying node
   debug:
