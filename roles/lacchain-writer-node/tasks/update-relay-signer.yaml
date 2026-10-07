@@ -80,7 +80,7 @@
     mode: '0644'
 
 - name: Copy latest service unit file to systemd
-  copy:
+  template:
     src: "relaysigner.service.j2"
     dest: /lib/systemd/system/relaysigner.service
     mode: 0644
