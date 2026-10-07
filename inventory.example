@@ -11,6 +11,7 @@
 
 #Current Besu commit sha obtained from: https://github.com/hyperledger/besu/releases
 #Tested BESU versions: 
+# 23.10.2 (official LNet version, mainnet and testnet)
 # 23.4.1
 # 22.7.0
 # 21.10.6
@@ -35,5 +36,5 @@ bootnode=false
 validator=false
 first_node=false
 install=false
-besu_release_version='23.4.1'
+besu_release_version='23.10.2'
 dns_name=lacchain.com
