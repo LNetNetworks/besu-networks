@@ -1,0 +1,96 @@
+---
+- name: Update relay signer
+  debug:
+        msg: "Updating Relay Signer"
+
+- name: Stop Relay Signer service
+  service:
+    name: relaysigner
+    state: stopped
+
+- name: Ensure Relay Signer directory exists
+  file:
+        path: "{{ besu_home }}/gas-relay-signer"
+        state: directory
+        mode: '0755'
+
+# Copia del binario y de la config en ejecución antes de reemplazarlos, para poder volver atrás
+# (en mainnet el binario previo es el v1.0.1 que venía versionado en el repo clonado).
+- name: Check current Relay Signer binary
+  stat:
+    path: "{{ besu_home }}/gas-relay-signer/gas-relay-signer"
+  register: relay_signer_bin
+
+- name: Backup current Relay Signer binary and config
+  copy:
+        src: "{{ besu_home }}/gas-relay-signer/{{ item }}"
+        dest: "{{ besu_home }}/gas-relay-signer/{{ item }}.bak"
+        remote_src: yes
+        mode: preserve
+  with_items:
+        - gas-relay-signer
+        - config.toml
+  when: relay_signer_bin.stat.exists
+  failed_when: false
+
+# mainnet y testnet: se descarga el ejecutable de la release. En mainnet esto sustituye al antiguo
+# `git clone` en v1.0.1: desde v1.1.0 el binario ya no está en el repo.
+- name: Download Relay Signer binary from release
+  get_url:
+        url: "{{ relay_signer_release_url }}"
+        dest: "{{ besu_home }}/gas-relay-signer/gas-relay-signer"
+        mode: '0755'
+        force: true
+
+- name: Regenerate Relay Signer configuration file
+  template:
+    src: "relay-signer-config.j2"
+    dest: "{{ besu_home }}/gas-relay-signer/config.toml"
+    mode: 0644
+
+- name: Get node key
+  shell: cat {{ besu_home }}/data/key
+  register: key
+  no_log: true
+
+- name: Ensure systemd drop-in dir for relaysigner env
+  file:
+    path: /etc/systemd/system/relaysigner.service.d
+    state: directory
+    mode: '0755'
+
+# WRITER_KEY vía EnvironmentFile del propio servicio: /etc/profile.d solo aplica a shells de
+# login interactivas, no llega al proceso arrancado por systemd (por eso el install original
+# dejaba el relaysigner sin la key al arrancar como servicio).
+- name: Write WRITER_KEY environment file (restricted permissions)
+  copy:
+    content: "WRITER_KEY={{ key.stdout }}\n"
+    dest: /etc/systemd/system/relaysigner.service.d/writer-key.env
+    mode: '0600'
+    owner: root
+    group: root
+  no_log: true
+
+- name: Configure relaysigner systemd override to load WRITER_KEY
+  copy:
+    content: |
+      [Service]
+      EnvironmentFile=/etc/systemd/system/relaysigner.service.d/writer-key.env
+    dest: /etc/systemd/system/relaysigner.service.d/override.conf
+    mode: '0644'
+
+- name: Copy latest service unit file to systemd
+  template:
+    src: "relaysigner.service.j2"
+    dest: /lib/systemd/system/relaysigner.service
+    mode: 0644
+
+- name: Reload systemd daemon
+  systemd:
+    daemon_reload: yes
+
+- name: Start Relay Signer service
+  service:
+    name: relaysigner
+    enabled: yes
+    state: started

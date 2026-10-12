@@ -2,10 +2,23 @@
 nodeURL = "http://localhost:4545"
 wsURL = "ws://localhost:4546"
 contractAddress = "{{vars['relayhub_address_' + network]}}"
-nodeKeyPath = "/root/lacchain/data/key"  
-nodeAddressPath = "/root/lacchain/data/nodeAddress"
+nodeKeyPath = "{{ besu_home }}/data/key"  
+nodeAddressPath = "{{ besu_home }}/data/nodeAddress"
 port = 9001
 
 [security]
 permissionsEnabled = false
 accountContractAddress = "{{localpermissioning_address}}"
+# Reordenamiento de nonces (v1.1.0+): permite encadenar varias metatx de un usuario sin esperar a
+# que cada una se mine. maxInflightPerUser toma su default (5), que iguala el techo de la red.
+[reorder]
+enabled = true
+windowMs = 3000
+receiptTimeoutMs = 60000
+
+# Monitor en vivo en /dashboard y /dashboard/stream. Apagado por defecto: no autentica y publica el
+# from, los hashes y el gas de todas las metatx. Lo habilita el operador poniendo enabled = true y
+# reiniciando relaysigner.
+[dashboard]
+enabled = false
+bufferSize = 1000

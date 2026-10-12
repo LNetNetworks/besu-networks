@@ -14,9 +14,31 @@
     msg: "legacy-protestnet (networkT='2') was deprecated and removed. Choose mainnet-omega (0) or open-protestnet (1)."
   when: (networkT == '2')
 
+# Versión oficial de Besu para toda la red (install y update, mainnet y testnet): 23.10.2.
+# Requiere tx-pool="legacy" (plantillas pantheon-config y update-besu.yaml). Para otra
+# versión: -e besu_release_version=<x.y.z> (las extra vars ganan al set_fact).
+- name: setting besu version (mainnet / testnet)
+  set_fact:
+    besu_release_version: "23.10.2"
+  when: (networkT == '0') or (networkT == '1')
+
 - name: Deploying node
   debug:
     msg: You are deploying a WRITER on {{network}}
+
+# El nodo vive en /root/lacchain (instalaciones con este Ansible) o en /apps/lacchain (disco de
+# datos aparte). En una instalación nueva no existe ninguno y se usa /root/lacchain.
+- name: Resolve besu home directory (prefer ~/lacchain, fallback /apps/lacchain)
+  shell: |
+    if [ -d "$HOME/lacchain" ]; then echo "$HOME/lacchain";
+    elif [ -d /apps/lacchain ]; then echo /apps/lacchain;
+    else echo "$HOME/lacchain"; fi
+  register: besu_home_result
+  changed_when: false
+
+- name: Set besu_home fact
+  set_fact:
+    besu_home: "{{ besu_home_result.stdout }}"
 
 - name: get public ip
   shell: dig +short myip.opendns.com @resolver1.opendns.com 2>/dev/null || curl -s --retry 2 icanhazip.com

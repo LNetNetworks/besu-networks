@@ -10,3 +10,13 @@
 
 - name: start besu
   import_tasks: "start-node.yaml"
+
+- name: Update relay signer
+  import_tasks: "update-relay-signer.yaml"
+  when: (networkT == '0') or (networkT == '1') # relay-signer is disabled on pro-testnet
+
+# Re-aplica nginx en mainnet y testnet. Antes de reemplazar nginx.conf se guarda una copia
+# (nginx.conf.bak-<epoch>) por si el nodo tenía un bloque propio que haya que restaurar.
+- name: Update nginx configuration
+  import_tasks: "update-nginx.yaml"
+  when: (networkT == '0') or (networkT == '1')
